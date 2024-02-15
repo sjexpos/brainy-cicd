@@ -1,4 +1,4 @@
-name: Build and Publish Brainy Server
+name: ci
 on:
   workflow_dispatch:
     secrets:
