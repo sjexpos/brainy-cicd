@@ -11,11 +11,10 @@ on:
       DOCKERHUB_TOKEN:
         required: true
     inputs:
-      branch:
-        description: Branch name to build
+      tag:
+        description: Tag name to build and publish
         type: string
         required: true
-        default: "main"
     
 jobs:
 
@@ -33,7 +32,7 @@ jobs:
           eval $(ssh-agent -s)
           echo "${{ secrets.BRAINY_SERVER_REPOSITORY_SSH_KEY }}" |  ssh-add -
           git clone ${{ secrets.BRAINY_SERVER_REPOSITORY }} .
-          git checkout ${{ inputs.branch }}
+          git checkout ${{ inputs.tag }}
           ls -al
           make clone_thirdparty_libs
 
@@ -61,4 +60,4 @@ jobs:
           file: Dockerfile.brainy
           platforms: linux/amd64, linux/arm64
           push: true
-          tags: sjexpos/brainy:latest
+          tags: sjexpos/brainy:${{ inputs.tag }}
