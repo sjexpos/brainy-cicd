@@ -18,7 +18,22 @@ on:
     
 jobs:
 
+  tagging:
+    name: Create Tag
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Push Git Tag
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git tag -am "Tagging for release v${{ inputs.tag }}" v${{ inputs.tag }}
+          git push origin v${{ inputs.tag }}
+
   build-and-publish:
+    name: Build and publish
+    needs: [tagging]
     runs-on: ubuntu-latest
     steps:
       - name: Set up ssh agent
@@ -26,13 +41,13 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H bitbucket.org >> ~/.ssh/known_hosts
-      - name: Checkout code tag ${{ inputs.tag }}
+      - name: Checkout code tag v${{ inputs.tag }}
         shell: bash
         run: |
           eval $(ssh-agent -s)
           echo "${{ secrets.BRAINY_SERVER_REPOSITORY_SSH_KEY }}" |  ssh-add -
           git clone ${{ secrets.BRAINY_SERVER_REPOSITORY }} .
-          git checkout ${{ inputs.tag }}
+          git checkout v${{ inputs.tag }}
           ls -al
           make clone_thirdparty_libs
 
